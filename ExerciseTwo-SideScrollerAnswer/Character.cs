@@ -30,8 +30,8 @@ namespace ExerciseTwo_SideScrollerAnswer
             bool moveLeft;
             bool moveUp;
             DetermineAllowedMovement(groundToCheck, velocity, out moveDown, out moveRight, out moveLeft, out moveUp);
-
-            if (moveDown)
+            
+            if (moveDown && velocity.Y > 0)
             {
                 _position.Y += velocity.Y;
             }
@@ -97,63 +97,52 @@ namespace ExerciseTwo_SideScrollerAnswer
             {
                 if (expectedRectangle.Intersects(ground.Bounds))
                 {
-                    Rectangle collisionRectangle = Rectangle.Intersect(expectedRectangle, ground.Bounds);
-                    if (collisionRectangle.Height == 1)
+                    // We're moving down, check to see if the bottom of the expected rectangle will be past the top of the ground
+                    // also check to make sure the rectangle's (not expected rectangle) right is past the left side of the ground
+                    // also check to see if the rectangle's left is past the right side of the ground
+                    // We do the above two checks to make sure the rectangle is within the right and left bounds of the ground and not to its sides
+                    if (velocity.Y > 0 &&
+                        expectedRectangle.Bottom > ground.Bounds.Top &&
+                        Rectangle.Left < ground.Bounds.Right &&
+                        Rectangle.Right > ground.Bounds.Left)
                     {
-                        if (collisionRectangle.Bottom - collisionRectangle.Center.Y == 1)
-                        {
-                            moveDown &= false;
-                        }
-                        else
-                        {
-                            moveUp &= false;
-                        }
+                        moveDown = false;
                     }
-                    else
+                    // We're moving up, check to see if the top of the expected rectangle will be past OR equal to the bottom of the ground
+                    // We do equal to, for this check because moving up is by 2 pixels, while all other directions move by one pixel
+                    // also check to make sure the rectangle's (not expected rectangle) right is past the left side of the ground
+                    // also check to see if the rectangle's left is past the right side of the ground
+                    // We do the above two checks to make sure the rectangle is within the right and left bounds of the ground and not to its sides
+                    else if (velocity.Y < 0 &&
+                        expectedRectangle.Top <= ground.Bounds.Bottom &&
+                        Rectangle.Left < ground.Bounds.Right &&
+                        Rectangle.Right > ground.Bounds.Left)
                     {
-
+                        moveUp = false;
                     }
 
-                    // The character is within the height of the ground
-                    if (expectedRectangle.Bottom >= ground.Bounds.Top &&
-                        expectedRectangle.Top <= ground.Bounds.Bottom)
-                     {
-                        if (expectedRectangle.Right > ground.Bounds.Left &&
-                            expectedRectangle.Right < ground.Bounds.Right)
-                        {
-                            moveRight &= false;
-                        }
-                        else if (expectedRectangle.Left < ground.Bounds.Right &&
-                                expectedRectangle.Left > ground.Bounds.Left)
-                        {
-                            moveLeft &= false;
-                        }
+                    // We're moving right, check to see if the right of the expected rectangle will be past the left of the ground
+                    // also check to make sure the rectangle's (not expected rectangle) top is past the bottom side of the ground
+                    // also check to see if the rectangle's bottom is past the top of the ground
+                    // We do the above two checks to make sure the rectangle is within the top and bottom bounds of the ground and on top or below the ground
+                    if (velocity.X > 0 &&
+                        expectedRectangle.Right > ground.Bounds.Left &&
+                        Rectangle.Top < ground.Bounds.Bottom &&
+                        Rectangle.Bottom > ground.Bounds.Top)
+                    {
+                        moveRight = false;
                     }
-
-                    // We continue because you can only ever be on top, to the right, to the left, or underneath a square never a combination.
-                    ////int rightIntersection = expectedRectangle.Right - ground.Bounds.Left;
-                    ////int leftIntersection = expectedRectangle.Left - ground.Bounds.Right;
-                    ////int topIntersection = expectedRectangle.Top - ground.Bounds.Bottom;
-                    ////int bottomIntersection = expectedRectangle.Bottom - ground.Bounds.Top;
-
-
-
-
-                     
-
-                    
-
-                    ////if (expectedRectangle.Top < ground.Bounds.Bottom &&
-                    ////    expectedRectangle.Top > ground.Bounds.Top)
-                    ////{
-                    ////    moveUp &= false;
-                    ////}
-
-                    ////if (expectedRectangle.Bottom > ground.Bounds.Top &&
-                    ////    expectedRectangle.Bottom < ground.Bounds.Bottom)
-                    ////{
-                    ////    moveDown &= false;
-                    ////}
+                    // We're moving left, check to see if the left of the expected rectangle will be past the right of the ground
+                    // also check to make sure the rectangle's (not expected rectangle) top is past the bottom side of the ground
+                    // also check to see if the rectangle's bottom is past the top of the ground
+                    // We do the above two checks to make sure the rectangle is within the top and bottom bounds of the ground and on top or below the ground
+                    else if (velocity.X < 0 &&
+                        expectedRectangle.Left < ground.Bounds.Right &&
+                        Rectangle.Top < ground.Bounds.Bottom &&
+                        Rectangle.Bottom > ground.Bounds.Top)
+                    {
+                        moveLeft = false;
+                    }
                 }
             }
         }
